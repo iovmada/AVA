@@ -8,7 +8,7 @@ const port = Number(process.env.PORT || 4173);
 const types = {
   '.html': 'text/html; charset=utf-8',
   '.css': 'text/css; charset=utf-8',
-  '.jpg': 'image/jpeg',
+  '.webp': 'image/webp',
   '.svg': 'image/svg+xml',
   '.ttf': 'font/ttf',
   '.txt': 'text/plain; charset=utf-8',

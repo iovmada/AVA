@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="theme-color" content="#233f32">
+    <meta name="theme-color" content="#100c09">
     <meta name="description" content="AVA Brebu — pizzerie, restaurant și cazare. Pregătim ceva bun. În curând, cu drag.">
     <meta name="robots" content="index, follow">
     <meta property="og:type" content="website">
@@ -14,13 +14,15 @@
     <link rel="icon" href="./assets/ava-logo.svg" type="image/svg+xml">
     <link rel="preload" href="./assets/fonts/instrument-serif-regular.ttf" as="font" type="font/ttf" crossorigin>
     <link rel="preload" href="./assets/fonts/instrument-serif-italic.ttf" as="font" type="font/ttf" crossorigin>
-    <link rel="preload" href="./assets/pizza-hero.jpg" as="image" fetchpriority="high">
     <link rel="stylesheet" href="./styles.css">
   </head>
   <body>
     <main class="coming-soon">
       <section class="hero" aria-labelledby="coming-soon-title">
-        <img class="hero__photo" src="./assets/pizza-hero.jpg" width="1376" height="768" alt="" fetchpriority="high" decoding="async">
+        <picture class="hero__background">
+          <source media="(max-aspect-ratio: 4/5)" srcset="./assets/pizza-portrait-640.webp 640w, ./assets/pizza-portrait-1200.webp 1200w" sizes="100vw">
+          <img class="hero__photo" src="./assets/pizza-hero-1920.webp" srcset="./assets/pizza-hero-1280.webp 1280w, ./assets/pizza-hero-1920.webp 1920w, ./assets/pizza-hero-2560.webp 2560w" sizes="100vw" width="1920" height="1072" alt="" fetchpriority="high">
+        </picture>
         <div class="hero__content">
           <img class="hero__logo" src="./assets/ava-logo.svg" width="136" height="136" alt="AVA — pizzerie, restaurant și cazare în Brebu">
           <p class="hero__eyebrow">Făină. Apă. Foc. Și un pic de suflet.</p>
