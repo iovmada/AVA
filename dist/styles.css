@@ -1,0 +1,183 @@
+@font-face {
+  font-family: "Instrument Serif";
+  src: url("./assets/fonts/instrument-serif-regular.ttf") format("truetype");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Instrument Serif";
+  src: url("./assets/fonts/instrument-serif-italic.ttf") format("truetype");
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "DM Sans";
+  src: url("./assets/fonts/dm-sans-regular.ttf") format("truetype");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
+:root {
+  color-scheme: dark;
+  --green-deep: #233f32;
+  --green-mid: #37513b;
+  --green-light: #4b6344;
+  --cream: #f1eddf;
+  --sand: #e6d2b6;
+  --page-y: clamp(48px, 8.8889vw, 128px);
+  --page-x: clamp(24px, 5.5556vw, 80px);
+}
+
+* { box-sizing: border-box; }
+
+html { min-width: 280px; background: #fff; }
+
+body {
+  margin: 0;
+  color: var(--cream);
+  font-family: "DM Sans", sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+.coming-soon {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  min-height: 100vh;
+  min-height: 100svh;
+  padding: var(--page-y) var(--page-x);
+  overflow: hidden;
+  border-radius: 0 0 64px 64px;
+  background: linear-gradient(135deg, var(--green-light) 0%, var(--green-mid) 36%, var(--green-deep) 75%);
+}
+
+.hero {
+  position: relative;
+  isolation: isolate;
+  width: 100%;
+  max-width: 1280px;
+  height: min(750px, calc(100vh - 2 * var(--page-y)));
+  height: min(750px, calc(100svh - 2 * var(--page-y)));
+  min-height: 520px;
+  overflow: hidden;
+  border-radius: 64px;
+  background: #241b15;
+}
+
+.hero__photo {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: calc(100% - 23px);
+  object-fit: cover;
+  object-position: center;
+}
+
+.hero__content {
+  position: absolute;
+  inset: 38px 60px 63px 64px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 22px;
+  text-align: center;
+}
+
+.hero__logo {
+  display: block;
+  flex: 0 0 auto;
+}
+
+.hero__eyebrow {
+  margin: 0;
+  color: var(--sand);
+  font-size: 10px;
+  font-weight: 400;
+  line-height: 13px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.hero__title {
+  margin: 0;
+  font-family: "Instrument Serif", Georgia, serif;
+  font-size: 138px;
+  font-weight: 400;
+  line-height: 1;
+}
+
+.hero__title span,
+.hero__title em { display: block; }
+
+.hero__title em {
+  margin-top: 22px;
+  font-size: 146px;
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: -2px;
+}
+
+@media (min-width: 1800px) {
+  .coming-soon { align-items: center; }
+}
+
+@media (max-width: 1100px) {
+  .coming-soon { border-radius: 0 0 48px 48px; }
+  .hero { border-radius: 48px; }
+  .hero__content { inset: 32px 28px 50px; }
+  .hero__title { font-size: clamp(86px, 10vw, 120px); }
+  .hero__title em { font-size: clamp(92px, 10.6vw, 128px); }
+}
+
+@media (max-width: 640px) {
+  :root { --page-y: 28px; --page-x: 20px; }
+  .coming-soon { border-radius: 0 0 32px 32px; }
+  .hero { min-height: 560px; border-radius: 32px; }
+  .hero__photo {
+    height: 100%;
+    object-position: 61% center;
+  }
+  .hero::after {
+    position: absolute;
+    z-index: -1;
+    inset: 0;
+    content: "";
+    background: linear-gradient(180deg, rgb(22 15 11 / 22%), rgb(22 15 11 / 8%) 55%, rgb(22 15 11 / 20%));
+  }
+  .hero__content { inset: 28px 16px 38px; gap: 24px; }
+  .hero__eyebrow {
+    max-width: 260px;
+    font-size: 10px;
+    line-height: 1.8;
+    letter-spacing: 1.6px;
+    text-wrap: balance;
+  }
+  .hero__title { font-size: clamp(64px, 18vw, 100px); }
+  .hero__title em {
+    margin-top: 16px;
+    font-size: clamp(72px, 20vw, 112px);
+    letter-spacing: -1px;
+  }
+}
+
+@media (max-width: 350px) {
+  :root { --page-x: 12px; }
+  .hero__content { inset-inline: 10px; }
+  .hero__eyebrow { letter-spacing: 1px; }
+}
+
+@media (max-height: 700px) and (min-width: 641px) {
+  :root { --page-y: 32px; }
+  .hero { min-height: 460px; }
+  .hero__content { gap: 12px; inset-block: 20px 32px; }
+  .hero__title { font-size: 100px; }
+  .hero__title em { margin-top: 10px; font-size: 108px; }
+}

@@ -1,0 +1,12 @@
+{
+  "name": "ava-coming-soon",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "AVA Brebu coming-soon page, based on the supplied Figma design.",
+  "scripts": {
+    "dev": "node scripts/serve.mjs",
+    "preview": "node scripts/serve.mjs"
+  },
+  "engines": { "node": ">=18" }
+}
