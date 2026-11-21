@@ -2,7 +2,7 @@
 
 A responsive, dependency-free coming-soon page for AVA Brebu. The supplied pizza photo fills the viewport, with smaller WebP images and a portrait crop for narrow screens. The original AVA logo and self-hosted Instrument Serif and DM Sans fonts are included.
 
-Design: https://www.figma.com/design/32nTqabvleQHyiAQThl7D4/Swissstaffing_local_DP?node-id=1691-443
+
 
 Repository: https://github.com/iovmada/AVA
 
