@@ -8,6 +8,15 @@ const menuPath = 'site/menu.json';
 const assetPath = 'dist/assets/site/';
 const origin = 'https://api.github.com';
 
+function signingKey(value) {
+  const pem = value.includes('BEGIN') ? value.replaceAll('\\n', '\n') : Buffer.from(value, 'base64').toString();
+  const match = pem.match(/-----BEGIN (RSA PRIVATE KEY|PRIVATE KEY)-----([\s\S]+?)-----END \1-----/);
+  if (!match) throw new Error('GitHub App signing key must be a PEM private key.');
+  const [, label, body] = match;
+  const lines = body.replace(/\s/g, '').match(/.{1,64}/g);
+  return `-----BEGIN ${label}-----\n${lines.join('\n')}\n-----END ${label}-----\n`;
+}
+
 function jwt(appId, privateKey) {
   const now = Math.floor(Date.now() / 1000);
   const encode = (value) => Buffer.from(JSON.stringify(value)).toString('base64url');
@@ -190,8 +199,7 @@ function createHandler(send = fetch, env = process.env, readMenu = readPublished
     }
 
     try {
-      const privateKey = key.includes('BEGIN') ? key.replaceAll('\\n', '\n') : Buffer.from(key, 'base64').toString();
-      const app = githubClient(send, jwt(appId, privateKey));
+      const app = githubClient(send, jwt(appId, signingKey(key)));
       const { token } = await app(`/app/installations/${installationId}/access_tokens`, {
         repositories: ['AVA'], permissions: { contents: 'write', pull_requests: 'write' },
       });
