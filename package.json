@@ -6,6 +6,7 @@
   "description": "AVA Brebu website with pizzeria, restaurant and accommodation pages.",
   "scripts": {
     "build": "node site/build.mjs",
+    "build:menu-preview": "node site/build-menu-preview.mjs",
     "dev": "node scripts/serve.mjs",
     "preview": "node scripts/serve.mjs"
   },

@@ -1,7 +1,8 @@
 import { categories, menu, menuVersion } from './menu.mjs';
 
-export function adminPage() {
-  const demo = process.env.AVA_MENU_DEMO === '1';
+export function adminPage({ publicPreview = false } = {}) {
+  const demo = publicPreview || process.env.AVA_MENU_DEMO === '1';
+  const siteUrl = publicPreview ? 'https://www.ava-brebu.ro/' : '../';
   const proposalUrl = process.env.AVA_MENU_PROPOSAL_URL || '/api/menu/propose';
   if (!/^\/api\/[a-z0-9/-]+$/.test(proposalUrl)) {
     throw new Error('AVA_MENU_PROPOSAL_URL must be a same-origin /api/ path.');
@@ -43,7 +44,7 @@ export function adminPage() {
       <button type="button" data-section="restaurant"><span>Restaurant</span><span aria-hidden="true">↗</span></button>
       <button type="button" data-section="daily"><span>Meniul zilei</span><span aria-hidden="true">↗</span></button>
     </nav>
-    <a class="editor-site-link" href="../">Vezi site-ul AVA <span aria-hidden="true">↗</span></a>
+    <a class="editor-site-link" href="${siteUrl}">Vezi site-ul AVA <span aria-hidden="true">↗</span></a>
   </aside>
   <main class="editor-main">
     <div class="editor-topline">
@@ -83,7 +84,7 @@ export function adminPage() {
   </dialog>
   <dialog class="editor-dialog" id="review-dialog" aria-labelledby="review-title">
     <div class="dialog-heading"><h2 id="review-title">Verifică modificările</h2><button aria-label="Închide" type="button" class="dialog-close" data-close>×</button></div>
-    <p class="review-note">Meniul public se actualizează după aprobarea pe GitHub.${demo ? ' Ciorna se salvează în acest browser.' : ''}</p>
+    <p class="review-note">${publicPreview ? 'Modificările de test se salvează în acest browser.' : `Meniul public se actualizează după aprobarea pe GitHub.${demo ? ' Ciorna se salvează în acest browser.' : ''}`}</p>
     <ul id="review-list" class="review-list"></ul>
     <div class="dialog-actions">
       <button class="editor-button editor-button--outline" type="button" data-close>Înapoi la editare</button>
