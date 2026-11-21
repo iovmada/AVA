@@ -1,11 +1,13 @@
 import { mkdir, writeFile } from 'node:fs/promises';
 import { casaPage, homePage, pizzaPage, restaurantPage } from './pages.mjs';
+import { adminPage } from './admin.mjs';
 
 const pages = [
   ['', homePage],
   ['pizzeria/', pizzaPage],
   ['restaurant/', restaurantPage],
   ['casa/', casaPage],
+  ['admin/', adminPage],
 ];
 
 for (const [directory, render] of pages) {

@@ -1,0 +1,84 @@
+import { categories, menu, menuVersion } from './menu.mjs';
+
+export function adminPage() {
+  const proposalUrl = process.env.AVA_MENU_PROPOSAL_URL || '';
+  if (proposalUrl && !/^\/api\/[a-z0-9/-]+$/.test(proposalUrl)) {
+    throw new Error('AVA_MENU_PROPOSAL_URL must be a same-origin /api/ path.');
+  }
+  const data = JSON.stringify({ items: menu, categories, menuVersion, proposalUrl }).replaceAll('<', '\\u003c');
+  return `<!doctype html>
+<html lang="ro">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>Administrare meniu · AVA Brebu</title>
+  <link rel="icon" href="../assets/ava-logo.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../styles.css">
+  <link rel="stylesheet" href="./editor.css">
+  <script src="./editor.js" defer></script>
+</head>
+<body class="menu-editor">
+  <aside class="editor-sidebar">
+    <div class="editor-brand">
+      <img src="../assets/site/home-footer-logo.svg" width="56" height="56" alt="">
+      <div><strong>AVA Brebu</strong><span>Administrare meniu</span></div>
+    </div>
+    <nav class="editor-nav" aria-label="Meniuri">
+      <button type="button" data-section="pizzeria" aria-current="page"><span>Pizzeria</span><span aria-hidden="true">↗</span></button>
+      <button type="button" data-section="restaurant"><span>Restaurant</span><span aria-hidden="true">↗</span></button>
+      <button type="button" data-section="daily"><span>Meniul zilei</span><span aria-hidden="true">↗</span></button>
+    </nav>
+    <a class="editor-site-link" href="../">Vezi site-ul AVA <span aria-hidden="true">↗</span></a>
+  </aside>
+  <main class="editor-main">
+    <div class="editor-topline">
+      <span class="editor-path">Administrare <span aria-hidden="true">/</span> <span id="editor-section">Pizzeria</span></span>
+      <span class="draft-status">${proposalUrl ? 'Publicare cu aprobare' : 'Previzualizare'}</span>
+    </div>
+    <header class="editor-heading">
+      <div>
+        <h1 id="editor-title">Meniul pizzeriei</h1>
+        <p id="editor-description">Editează prețurile și gramajele direct din listă.</p>
+      </div>
+      <button id="review-changes" class="editor-button editor-button--primary" type="button" disabled>Verifică modificările <span aria-hidden="true">→</span></button>
+    </header>
+    <section class="editor-panel" aria-labelledby="editor-title">
+      <div class="editor-toolbar">
+        <label class="editor-search">
+          <span aria-hidden="true" class="search-icon"></span>
+          <span class="sr-only">Caută un preparat</span>
+          <input id="editor-search" type="search" placeholder="Caută un preparat…">
+        </label>
+        <label class="editor-category"><span class="sr-only">Filtrează după categorie</span><select id="category-filter"></select></label>
+        <button id="add-item" class="editor-button editor-button--outline" type="button"><span class="add-icon" aria-hidden="true">+</span> Adaugă preparat</button>
+      </div>
+      <div class="editor-table" id="item-list"></div>
+      <div class="editor-panel-footer"><p id="editor-count"></p><p id="editor-status" role="status">Ciorna se salvează în acest browser.</p></div>
+    </section>
+  </main>
+  <dialog class="editor-dialog" id="item-dialog" aria-labelledby="item-dialog-title">
+    <form id="item-form">
+      <div class="dialog-heading"><h2 id="item-dialog-title">Editează preparatul</h2><button aria-label="Închide" type="button" class="dialog-close" data-close>×</button></div>
+      <div class="dialog-fields" id="item-fields"></div>
+      <div class="dialog-actions">
+        <button class="editor-button editor-button--outline" type="button" data-close>Anulează</button>
+        <button class="editor-button editor-button--primary" type="submit">Aplică modificările</button>
+      </div>
+    </form>
+  </dialog>
+  <dialog class="editor-dialog" id="review-dialog" aria-labelledby="review-title">
+    <div class="dialog-heading"><h2 id="review-title">Verifică modificările</h2><button aria-label="Închide" type="button" class="dialog-close" data-close>×</button></div>
+    <p class="review-note">Meniul public se actualizează după aprobarea pe GitHub.${proposalUrl ? '' : ' Ciorna se salvează în acest browser.'}</p>
+    <ul id="review-list" class="review-list"></ul>
+    <div class="dialog-actions">
+      <button class="editor-button editor-button--outline" type="button" data-close>Înapoi la editare</button>
+      <button id="save-draft" class="editor-button editor-button--outline" type="button">Salvează ciorna</button>
+      ${proposalUrl ? '<button id="submit-proposal" class="editor-button editor-button--primary" type="button">Trimite spre aprobare</button>' : ''}
+    </div>
+    ${proposalUrl ? '<form id="proposal-form" hidden><label>Cod de trimitere<input type="password" name="code" required minlength="16" autocomplete="current-password"></label><p id="proposal-status" role="status"></p><a id="proposal-link" target="_blank" rel="noopener" hidden>Vezi propunerea pe GitHub ↗</a><button type="submit" class="editor-button editor-button--primary">Trimite propunerea</button></form>' : ''}
+  </dialog>
+  <script id="editor-data" type="application/json">${data}</script>
+</body>
+</html>`;
+}

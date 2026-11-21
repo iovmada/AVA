@@ -130,15 +130,34 @@ export function layoutFor(page) {
   return { base, asset, button, icon, photo, document, relatedSection };
 }
 
-export function menuItem([name, price, description, detail]) {
+export function escapeHtml(value) {
+  return value.replace(/[&<>"']/g, (character) => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+  })[character]);
+}
+
+function menuItem({ name, price, description, weight, note }) {
+  const detail = note ? `${weight} g · ${note}` : `${weight} g`;
   return `<div class="dish-copy">
-    <div class="dish-title"><h3>${name}</h3><p class="dish-price">${price} <small>lei</small></p></div>
-    <p class="dish-description">${description}</p>
-    <p class="dish-detail">${detail}</p>
+    <div class="dish-title"><h3>${escapeHtml(name)}</h3><p class="dish-price">${price.toLocaleString('ro-RO')} <small>lei</small></p></div>
+    <p class="dish-description">${escapeHtml(description)}</p>
+    <p class="dish-detail">${escapeHtml(detail)}</p>
   </div>`;
 }
 
-export function menuPanel(ui, { title, caption, categories, items, featured = [], texture, tone }) {
+function menuGroup(ui, entries) {
+  const withPhoto = entries.filter(({ photo }) => photo);
+  const withoutPhoto = entries.filter(({ photo }) => !photo);
+  return `${withPhoto.length ? `<p class="kicker menu-featured-label">Recomandările casei</p><div class="dish-grid dish-grid--featured">
+    ${withPhoto.map((item) => `<article class="featured-dish">
+      <div class="featured-photo">${ui.photo(escapeHtml(item.photo), escapeHtml(item.name))}${item.label ? `<span class="featured-label">${escapeHtml(item.label)}</span>` : ''}</div>
+      ${menuItem(item)}
+    </article>`).join('')}
+  </div>` : ''}
+  ${withoutPhoto.length ? `<div class="dish-grid">${withoutPhoto.map((item) => `<article class="dish">${menuItem(item)}</article>`).join('')}</div>` : ''}`;
+}
+
+export function menuPanel(ui, { title, caption, categories, items, texture, tone }) {
   return `<section id="meniu" class="menu-panel wrap menu-panel--${tone}" data-menu aria-labelledby="menu-title" style="--menu-texture: url('${ui.asset(texture)}')">
     <header class="panel-head">
       <p class="kicker">${caption}</p>
@@ -147,18 +166,12 @@ export function menuPanel(ui, { title, caption, categories, items, featured = []
     <div class="menu-filters" role="group" aria-label="Categorii de meniu">
       ${categories.map((label, i) => `<button type="button" data-menu-filter="${i}" aria-controls="menu-group-${i}" aria-pressed="${i === 0}">${label}</button>`).join('')}
     </div>
-    <div id="menu-group-0" data-menu-group="0">
-      ${featured.length ? `<p class="kicker menu-featured-label">Recomandările casei</p><div class="dish-grid dish-grid--featured">
-        ${featured.map(({ item, photo, label }) => `<article class="featured-dish">
-          <div class="featured-photo">${ui.photo(photo, item[0])}<span class="featured-label">${label}</span></div>
-          ${menuItem(item)}
-        </article>`).join('')}
-      </div>` : ''}
-      <div class="dish-grid">${items.map((item) => `<article class="dish">${menuItem(item)}</article>`).join('')}</div>
-    </div>
-    ${categories.slice(1).map((label, i) => `<div class="menu-empty" id="menu-group-${i + 1}" data-menu-group="${i + 1}" hidden>
-      <h3>${label}</h3><p>Preparatele din această categorie vor fi adăugate în curând.</p>
-    </div>`).join('')}
+    ${categories.map((label, index) => {
+      const entries = items.filter(({ category }) => category === label);
+      return `<div id="menu-group-${index}" data-menu-group="${index}"${entries.length ? '' : ' class="menu-empty"'}${index === 0 ? '' : ' hidden'}>
+        ${entries.length ? menuGroup(ui, entries) : `<h3>${label}</h3><p>Preparatele din această categorie vor fi adăugate în curând.</p>`}
+      </div>`;
+    }).join('')}
     <p class="menu-review-note">Meniu de prezentare. Produsele și prețurile se confirmă înainte de lansare.</p>
   </section>`;
 }

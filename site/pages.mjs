@@ -1,5 +1,5 @@
-import { layoutFor, menuPanel } from './shared.mjs';
-import { dailyMenu, featured, pizzaMenu, restaurantMenu } from './menu.mjs';
+import { escapeHtml, layoutFor, menuPanel } from './shared.mjs';
+import { categories, menu } from './menu.mjs';
 
 const stories = {
   pizza: {
@@ -107,7 +107,7 @@ export function pizzaPage() {
       </section>
       ${menuPanel(ui, {
         title: 'Ce-ți face poftă?', caption: 'Alege. Împarte. Mai ia o felie.',
-        categories: ['Pizza', 'Paste', 'Salate', 'Deserturi', 'Băuturi'], items: pizzaMenu,
+        categories: categories.pizzeria, items: menu.filter(({ section, active }) => section === 'pizzeria' && active),
         texture: 'pizza-menu-texture.webp', tone: 'wine',
       })}
       ${ui.relatedSection('Mai rămâi puțin.', [
@@ -124,6 +124,7 @@ const dailyCourseLabels = [
 ];
 
 function dailyPanel(ui) {
+  const dailyMenu = menu.filter(({ section, active }) => section === 'daily' && active);
   const weightLabel = (grams) => `<span class="daily-weight">${grams}&nbsp;g</span>`;
   return `<section class="daily-panel wrap" id="meniul-zilei" aria-labelledby="daily-title" style="--menu-texture: url('${ui.asset('restaurant-daily-texture.webp')}')">
     <header class="panel-head">
@@ -132,19 +133,19 @@ function dailyPanel(ui) {
       <p>Luni – Vineri / 12:00 – 16:00</p>
     </header>
     <div class="daily-grid">
-      ${dailyMenu.map(({ price, servings, courses, breadWeight }, i) => `<article class="daily-card">
-          <h3 class="sr-only">Varianta 0${i + 1}</h3>
+      ${dailyMenu.map(({ name, price, servings, courses, breadWeight }) => `<article class="daily-card">
+          <h3 class="sr-only">${escapeHtml(name)}</h3>
           <dl>
             ${dailyCourseLabels.map(([label, icon], index) => {
               const [dish, grams] = courses[index];
-              return `<div><dt class="sr-only">${label}</dt><dd>${ui.icon(icon)}<span>${dish}</span>${weightLabel(grams)}</dd></div>`;
+              return `<div><dt class="sr-only">${label}</dt><dd>${ui.icon(icon)}<span>${escapeHtml(dish)}</span>${weightLabel(grams)}</dd></div>`;
             }).join('')}
           </dl>
           <div class="daily-summary">
             <p class="daily-bread">${ui.icon('course-bread.svg')}<span>Pâine de casă inclusă</span>${weightLabel(breadWeight)}</p>
             <p class="daily-price">${price} lei <small class="daily-serving">/ ${servings} ${servings === 1 ? 'porție' : 'porții'}</small></p>
           </div>
-        </article>`).join('')}
+      </article>`).join('') || '<p>Meniul zilei va fi disponibil în curând.</p>'}
     </div>
     <p class="daily-portion-note">Gramajele și porțiile sunt orientative.</p>
     <div class="daily-footer">
@@ -174,8 +175,8 @@ export function restaurantPage() {
       ${dailyPanel(ui)}
       ${menuPanel(ui, {
         title: 'Din bucătăria noastră.', caption: 'À la carte / Rețete cu rost',
-        categories: ['Feluri principale', 'Ciorbe', 'Garnituri', 'Deserturi', 'Băuturi'],
-        items: restaurantMenu, featured, texture: 'restaurant-menu-texture.webp', tone: 'green',
+        categories: categories.restaurant, items: menu.filter(({ section, active }) => section === 'restaurant' && active),
+        texture: 'restaurant-menu-texture.webp', tone: 'green',
       })}
       <section class="restaurant-story wrap">
         ${ui.photo('restaurant-story-tochitura.webp', 'Tochitură cu mămăligă, pâine proaspătă și tacâmuri pe o masă de lemn')}
