@@ -8,9 +8,21 @@
   <link rel="icon" href="../assets/ava-logo.svg" type="image/svg+xml">
   <link rel="stylesheet" href="../styles.css">
   <link rel="stylesheet" href="./editor.css">
-  <script src="./editor.js" defer></script>
+  <script src="./access.js" defer></script>
 </head>
-<body class="menu-editor">
+<body class="editor-access">
+  <main class="editor-login">
+    <img class="editor-login-logo" src="../assets/site/pizza-header-logo.svg" width="76" height="76" alt="AVA Brebu">
+    <h1>Administrare meniu</h1>
+    <form id="editor-login" method="post">
+      <label for="editor-password">Parolă</label>
+      <input id="editor-password" type="password" name="password" autocomplete="current-password" required>
+      <p id="access-status" role="status"></p>
+      <button class="editor-button editor-button--primary" type="submit">Intră în editor <span aria-hidden="true">→</span></button>
+    </form>
+    <a href="../">Înapoi la site</a>
+  </main>
+  <template id="editor-template">
   <aside class="editor-sidebar">
     <div class="editor-brand">
       <img src="../assets/site/home-footer-logo.svg" width="56" height="56" alt="">
@@ -26,7 +38,7 @@
   <main class="editor-main">
     <div class="editor-topline">
       <span class="editor-path">Administrare <span aria-hidden="true">/</span> <span id="editor-section">Pizzeria</span></span>
-      <span class="draft-status">Previzualizare</span>
+      <button id="editor-logout" class="editor-button editor-button--outline" type="button">Deconectare</button>
     </div>
     <header class="editor-heading">
       <div>
@@ -61,15 +73,16 @@
   </dialog>
   <dialog class="editor-dialog" id="review-dialog" aria-labelledby="review-title">
     <div class="dialog-heading"><h2 id="review-title">Verifică modificările</h2><button aria-label="Închide" type="button" class="dialog-close" data-close>×</button></div>
-    <p class="review-note">Meniul public se actualizează după aprobarea pe GitHub. Ciorna se salvează în acest browser.</p>
+    <p class="review-note">Meniul public se actualizează după aprobarea pe GitHub.</p>
     <ul id="review-list" class="review-list"></ul>
     <div class="dialog-actions">
       <button class="editor-button editor-button--outline" type="button" data-close>Înapoi la editare</button>
       <button id="save-draft" class="editor-button editor-button--outline" type="button">Salvează ciorna</button>
-
+      <button id="submit-proposal" class="editor-button editor-button--primary" type="button">Trimite spre aprobare</button>
     </div>
-
+    <p id="proposal-status" role="status"></p><a id="proposal-link" target="_blank" rel="noopener" hidden>Vezi propunerea pe GitHub ↗</a>
   </dialog>
-  <script id="editor-data" type="application/json">{"items":[{"id":"pizzeria-0","section":"pizzeria","name":"Margherita","price":32,"description":"Sos de roșii, mozzarella fior di latte, busuioc proaspăt","weight":400,"category":"Pizza","active":true,"note":"Clasică, așa cum trebuie."},{"id":"pizzeria-1","section":"pizzeria","name":"Quattro formaggi","price":42,"description":"Mozzarella, gorgonzola, parmezan, brânză maturată","weight":420,"category":"Pizza","active":true},{"id":"pizzeria-2","section":"pizzeria","name":"Prosciutto e funghi","price":39,"description":"Sos de roșii, mozzarella, prosciutto cotto, ciuperci","weight":450,"category":"Pizza","active":true},{"id":"pizzeria-3","section":"pizzeria","name":"Capricciosa","price":42,"description":"Sos de roșii, mozzarella, șuncă, ciuperci, măsline, anghinare","weight":480,"category":"Pizza","active":true},{"id":"pizzeria-4","section":"pizzeria","name":"Diavola","price":39,"description":"Sos de roșii, mozzarella, salam picant, ardei iute","weight":430,"category":"Pizza","active":true,"note":"Ușor picantă"},{"id":"pizzeria-5","section":"pizzeria","name":"Pizza Ava","price":46,"description":"Sos de roșii, mozzarella, prosciutto crudo, rucola, parmezan","weight":450,"category":"Pizza","active":true,"note":"Preferata casei"},{"id":"pizzeria-6","section":"pizzeria","name":"Marinara","price":28,"description":"Sos de roșii, usturoi, oregano, ulei de măsline","weight":350,"category":"Pizza","active":true,"note":"Simplă și aromată"},{"id":"pizzeria-7","section":"pizzeria","name":"Vegetariană","price":36,"description":"Sos de roșii, mozzarella, dovlecel, ardei, ciuperci, măsline","weight":450,"category":"Pizza","active":true,"note":"Din grădină"},{"id":"pizzeria-8","section":"pizzeria","name":"Quattro stagioni","price":44,"description":"Sos de roșii, mozzarella, șuncă, ciuperci, măsline, anghinare","weight":480,"category":"Pizza","active":true},{"id":"pizzeria-9","section":"pizzeria","name":"Prosciutto crudo","price":44,"description":"Sos de roșii, mozzarella, prosciutto crudo, rucola","weight":430,"category":"Pizza","active":true},{"id":"pizzeria-10","section":"pizzeria","name":"Tonno e cipolla","price":42,"description":"Sos de roșii, mozzarella, ton, ceapă roșie, măsline","weight":450,"category":"Pizza","active":true},{"id":"pizzeria-11","section":"pizzeria","name":"Salsiccia e funghi","price":45,"description":"Mozzarella, cârnați italienești, ciuperci, rozmarin","weight":460,"category":"Pizza","active":true},{"id":"restaurant-0","section":"restaurant","name":"Ciolan crocant","price":58,"description":"Ciolan rumenit la cuptor, cartofi aurii și sos de friptură.","weight":650,"category":"Feluri principale","active":true,"note":"La cuptor","photo":"restaurant-ciolan.webp","label":"La cuptor"},{"id":"restaurant-1","section":"restaurant","name":"Tochitură cu mămăligă","price":46,"description":"Carne de porc, cârnați și mămăligă, în sos de casă.","weight":450,"category":"Feluri principale","active":true,"note":"Rețetă de casă","photo":"restaurant-tochitura.webp","label":"Rețetă de casă"},{"id":"restaurant-2","section":"restaurant","name":"Tocană de vițel","price":48,"description":"Carne fragedă de vițel, sos de legume, mămăligă","weight":450,"category":"Feluri principale","active":true,"note":"Rețetă de familie"},{"id":"restaurant-3","section":"restaurant","name":"Sarmale ca acasă","price":44,"description":"Sarmale în foi de varză, afumătură, smântână, mămăligă","weight":420,"category":"Feluri principale","active":true},{"id":"restaurant-4","section":"restaurant","name":"Șnițel bănățean","price":42,"description":"Cotlet de porc, pesmet auriu, cartofi prăjiți, salată","weight":450,"category":"Feluri principale","active":true},{"id":"restaurant-5","section":"restaurant","name":"Papricaș de pui","price":42,"description":"Pui fraged, sos de ardei, găluște de casă","weight":480,"category":"Feluri principale","active":true},{"id":"restaurant-6","section":"restaurant","name":"Păstrăv la grătar","price":52,"description":"Păstrăv întreg, legume de sezon, lămâie","weight":400,"category":"Feluri principale","active":true},{"id":"restaurant-7","section":"restaurant","name":"Legume din grădină","price":34,"description":"Legume coapte, cremă de fasole, verdețuri proaspete","weight":350,"category":"Feluri principale","active":true,"note":"De post"},{"id":"daily-0","section":"daily","name":"Varianta 1","active":true,"price":35,"servings":1,"breadWeight":50,"courses":[["Supă de pui cu tăiței de casă",300],["Șnițel de pui",180],["Piure de cartofi · Salată de varză",250]]},{"id":"daily-1","section":"daily","name":"Varianta 2","active":true,"price":38,"servings":1,"breadWeight":50,"courses":[["Ciorbă țărănească de legume",300],["Ceafă de porc la cuptor",200],["Cartofi aurii · Murături de casă",220]]},{"id":"daily-2","section":"daily","name":"Varianta 3","active":true,"price":32,"servings":1,"breadWeight":50,"courses":[["Supă cremă de legume",300],["Tocăniță de ciuperci",220],["Mămăligă · Salată de sezon",250]]}],"categories":{"pizzeria":["Pizza","Paste","Salate","Deserturi","Băuturi"],"restaurant":["Feluri principale","Ciorbe","Garnituri","Deserturi","Băuturi"],"daily":[]},"menuVersion":"b51d3ed6e6ab1e5581688ffbb4a2b5d99059e433a4b1e56f2cbc734fc0d99132","proposalUrl":""}</script>
+  </template>
+  <script id="editor-data" type="application/json">{"proposalUrl":"/api/menu/propose"}</script>
 </body>
 </html>

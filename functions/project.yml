@@ -9,6 +9,7 @@ packages:
           memory: 128
         environment:
           AVA_MENU_SUBMIT_CODE: "${AVA_MENU_SUBMIT_CODE}"
+          AVA_MENU_ORIGIN: "${AVA_MENU_ORIGIN}"
           AVA_GITHUB_APP_ID: "${AVA_GITHUB_APP_ID}"
           AVA_GITHUB_INSTALLATION_ID: "${AVA_GITHUB_INSTALLATION_ID}"
           AVA_GITHUB_PRIVATE_KEY: "${AVA_GITHUB_PRIVATE_KEY}"

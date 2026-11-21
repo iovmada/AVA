@@ -183,3 +183,39 @@
 #proposal-form label { display: grid; width: min(100%, 290px); gap: 6px; font-size: .88rem; }
 #proposal-form input { min-width: 0; padding: 8px; border: 1px solid var(--editor-line); border-radius: 6px; }
 #proposal-link { text-decoration: underline; }
+
+.editor-access {
+  display: grid;
+  place-items: center;
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding: 24px;
+  background: #f6f3eb;
+}
+.editor-login {
+  width: min(100%, 410px);
+  padding: clamp(24px, 5vw, 44px);
+  background: #fffdf7;
+  border: 1px solid #e4ded0;
+  border-radius: 16px;
+}
+.editor-login-logo { margin-bottom: 21px; }
+.editor-login h1 { color: var(--wine); font-size: clamp(2.5rem, 7vw, 3.55rem); }
+.editor-login form { display: grid; gap: 7px; margin-top: 24px; }
+.editor-login label { color: var(--ink); font-size: .88rem; }
+.editor-login input {
+  width: 100%;
+  padding: 10px 12px;
+  background: #fffef9;
+  color: var(--ink);
+  border: 1px solid #b9bdad;
+  border-radius: 7px;
+  font: inherit;
+}
+.editor-login input:focus-visible { outline: 2px solid var(--pine); outline-offset: 2px; }
+.editor-login .editor-button { margin-top: 7px; cursor: pointer; }
+.editor-login > a { display: inline-block; margin-top: 24px; color: var(--pine); font-size: .85rem; }
+.editor-login > a:hover { text-decoration: underline; }
+#access-status, #proposal-status { color: var(--wine); font-size: .85rem; }
+#access-status:empty, #proposal-status:empty { display: none; }
+#proposal-link { display: inline-block; margin-top: 6px; }

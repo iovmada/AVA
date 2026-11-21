@@ -1,11 +1,13 @@
 import { categories, menu, menuVersion } from './menu.mjs';
 
 export function adminPage() {
-  const proposalUrl = process.env.AVA_MENU_PROPOSAL_URL || '';
-  if (proposalUrl && !/^\/api\/[a-z0-9/-]+$/.test(proposalUrl)) {
+  const demo = process.env.AVA_MENU_DEMO === '1';
+  const proposalUrl = process.env.AVA_MENU_PROPOSAL_URL || '/api/menu/propose';
+  if (!/^\/api\/[a-z0-9/-]+$/.test(proposalUrl)) {
     throw new Error('AVA_MENU_PROPOSAL_URL must be a same-origin /api/ path.');
   }
-  const data = JSON.stringify({ items: menu, categories, menuVersion, proposalUrl }).replaceAll('<', '\\u003c');
+  const data = JSON.stringify(demo ? { items: menu, categories, menuVersion, proposalUrl: '' } : { proposalUrl })
+    .replaceAll('<', '\\u003c');
   return `<!doctype html>
 <html lang="ro">
 <head>
@@ -16,9 +18,21 @@ export function adminPage() {
   <link rel="icon" href="../assets/ava-logo.svg" type="image/svg+xml">
   <link rel="stylesheet" href="../styles.css">
   <link rel="stylesheet" href="./editor.css">
-  <script src="./editor.js" defer></script>
+  <script src="./${demo ? 'editor.js' : 'access.js'}" defer></script>
 </head>
-<body class="menu-editor">
+<body class="${demo ? 'menu-editor' : 'editor-access'}">
+  ${demo ? '' : `<main class="editor-login">
+    <img class="editor-login-logo" src="../assets/site/pizza-header-logo.svg" width="76" height="76" alt="AVA Brebu">
+    <h1>Administrare meniu</h1>
+    <form id="editor-login" method="post">
+      <label for="editor-password">Parolă</label>
+      <input id="editor-password" type="password" name="password" autocomplete="current-password" required>
+      <p id="access-status" role="status"></p>
+      <button class="editor-button editor-button--primary" type="submit">Intră în editor <span aria-hidden="true">→</span></button>
+    </form>
+    <a href="../">Înapoi la site</a>
+  </main>
+  <template id="editor-template">`}
   <aside class="editor-sidebar">
     <div class="editor-brand">
       <img src="../assets/site/home-footer-logo.svg" width="56" height="56" alt="">
@@ -34,7 +48,7 @@ export function adminPage() {
   <main class="editor-main">
     <div class="editor-topline">
       <span class="editor-path">Administrare <span aria-hidden="true">/</span> <span id="editor-section">Pizzeria</span></span>
-      <span class="draft-status">${proposalUrl ? 'Publicare cu aprobare' : 'Previzualizare'}</span>
+      ${demo ? '<span class="draft-status">Previzualizare</span>' : '<button id="editor-logout" class="editor-button editor-button--outline" type="button">Deconectare</button>'}
     </div>
     <header class="editor-heading">
       <div>
@@ -69,15 +83,16 @@ export function adminPage() {
   </dialog>
   <dialog class="editor-dialog" id="review-dialog" aria-labelledby="review-title">
     <div class="dialog-heading"><h2 id="review-title">Verifică modificările</h2><button aria-label="Închide" type="button" class="dialog-close" data-close>×</button></div>
-    <p class="review-note">Meniul public se actualizează după aprobarea pe GitHub.${proposalUrl ? '' : ' Ciorna se salvează în acest browser.'}</p>
+    <p class="review-note">Meniul public se actualizează după aprobarea pe GitHub.${demo ? ' Ciorna se salvează în acest browser.' : ''}</p>
     <ul id="review-list" class="review-list"></ul>
     <div class="dialog-actions">
       <button class="editor-button editor-button--outline" type="button" data-close>Înapoi la editare</button>
       <button id="save-draft" class="editor-button editor-button--outline" type="button">Salvează ciorna</button>
-      ${proposalUrl ? '<button id="submit-proposal" class="editor-button editor-button--primary" type="button">Trimite spre aprobare</button>' : ''}
+      ${demo ? '' : '<button id="submit-proposal" class="editor-button editor-button--primary" type="button">Trimite spre aprobare</button>'}
     </div>
-    ${proposalUrl ? '<form id="proposal-form" hidden><label>Cod de trimitere<input type="password" name="code" required minlength="16" autocomplete="current-password"></label><p id="proposal-status" role="status"></p><a id="proposal-link" target="_blank" rel="noopener" hidden>Vezi propunerea pe GitHub ↗</a><button type="submit" class="editor-button editor-button--primary">Trimite propunerea</button></form>' : ''}
+    ${demo ? '' : '<p id="proposal-status" role="status"></p><a id="proposal-link" target="_blank" rel="noopener" hidden>Vezi propunerea pe GitHub ↗</a>'}
   </dialog>
+  ${demo ? '' : '</template>'}
   <script id="editor-data" type="application/json">${data}</script>
 </body>
 </html>`;

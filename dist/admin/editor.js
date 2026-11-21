@@ -30,7 +30,6 @@ const reviewButton = $('#review-changes');
 const itemDialog = $('#item-dialog');
 const reviewDialog = $('#review-dialog');
 const itemForm = $('#item-form');
-const proposalForm = $('#proposal-form');
 
 const safe = (value) => String(value ?? '').replace(/[&<>"']/g, (char) => ({
   '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
@@ -345,44 +344,51 @@ $('#save-draft').addEventListener('click', () => {
   }
 });
 
-if (proposalForm) {
+if (proposalUrl) {
   const button = $('#submit-proposal');
   const feedback = $('#proposal-status');
   const link = $('#proposal-link');
-  button.addEventListener('click', () => {
-    proposalForm.hidden = false;
-    proposalForm.elements.namedItem('code').focus();
-  });
   reviewDialog.addEventListener('close', () => {
-    proposalForm.reset();
-    proposalForm.hidden = true;
     feedback.textContent = '';
     link.hidden = true;
   });
-  proposalForm.addEventListener('submit', async (event) => {
-    event.preventDefault();
-    const submit = proposalForm.querySelector('[type="submit"]');
-    const password = proposalForm.elements.namedItem('code');
-    submit.disabled = true;
+  button.addEventListener('click', async () => {
+    button.disabled = true;
     feedback.textContent = 'Se trimite propunerea…';
     link.hidden = true;
     try {
       const response = await fetch(proposalUrl, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${password.value}` },
-        body: JSON.stringify({ version: menuVersion, items }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'propose', version: menuVersion, items }),
       });
+      if (response.status === 401) {
+        localStorage.setItem(storageKey, JSON.stringify(items));
+        location.reload();
+        return;
+      }
       const result = await response.json();
       if (!response.ok) throw new Error(result.error || 'Propunerea nu a putut fi trimisă.');
       if (!/^https:\/\/github\.com\/iovmada\/AVA\/pull\/\d+$/.test(result.url)) throw new Error('Linkul propunerii nu este valid.');
       link.href = result.url;
       link.hidden = false;
       feedback.textContent = 'Propunerea așteaptă aprobarea pe GitHub.';
-      password.value = '';
     } catch (error) {
       feedback.textContent = error.message;
     } finally {
-      submit.disabled = false;
+      button.disabled = false;
+    }
+  });
+  $('#editor-logout').addEventListener('click', async () => {
+    const logout = $('#editor-logout');
+    logout.disabled = true;
+    try {
+      const response = await fetch(proposalUrl, { method: 'DELETE' });
+      if (!response.ok) throw new Error('Deconectarea nu a reușit.');
+      location.reload();
+    } catch {
+      status.textContent = 'Deconectarea nu a reușit. Încearcă din nou.';
+      logout.disabled = false;
     }
   });
 }

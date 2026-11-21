@@ -1,5 +1,6 @@
-const { createHash, createSign, timingSafeEqual } = require('node:crypto');
-const { hash, MenuError, validateProposal } = require('./menu-data.js');
+const { createSign } = require('node:crypto');
+const { categories, hash, MenuError, validateProposal } = require('./menu-data.js');
+const { correctPassword, startSession, endSession, validSession } = require('./admin-session.js');
 
 const repository = 'iovmada/AVA';
 const base = 'main';
@@ -14,13 +15,17 @@ function jwt(appId, privateKey) {
   return `${payload}.${createSign('RSA-SHA256').update(payload).sign(privateKey).toString('base64url')}`;
 }
 
-function credentialsMatch(header, code) {
-  const digest = (value) => createHash('sha256').update(value).digest();
-  return typeof header === 'string' && timingSafeEqual(digest(header), digest(`Bearer ${code}`));
-}
-
-function json(statusCode, body) {
-  return { statusCode, headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' }, body };
+function json(statusCode, body, cookie) {
+  return {
+    statusCode,
+    headers: {
+      'Content-Type': 'application/json; charset=utf-8',
+      'Cache-Control': 'no-store',
+      'X-Content-Type-Options': 'nosniff',
+      ...(cookie ? { 'Set-Cookie': cookie } : {}),
+    },
+    body,
+  };
 }
 
 class GithubError extends Error {
@@ -120,19 +125,44 @@ async function propose(api, payload) {
   }
 }
 
-function createHandler(send = fetch, env = process.env) {
+async function readPublishedMenu(send) {
+  const response = await send(`${origin}/repos/${repository}/contents/${menuPath}?ref=${base}`, {
+    headers: { Accept: 'application/vnd.github+json', 'User-Agent': 'AVA-Menu-Editor', 'Cache-Control': 'no-cache' },
+    redirect: 'error',
+    signal: AbortSignal.timeout(8_000),
+  });
+  if (!response.ok) throw new GithubError(response.status);
+  const file = await response.json();
+  return Buffer.from(file.content, 'base64');
+}
+
+function createHandler(send = fetch, env = process.env, readMenu = readPublishedMenu) {
   return async ({ http } = {}) => {
-    if (http?.method?.toUpperCase() !== 'POST') return json(405, { error: 'Metodă indisponibilă.' });
+    const method = http?.method?.toUpperCase();
+    if (!['GET', 'POST', 'DELETE'].includes(method)) return json(405, { error: 'Metodă indisponibilă.' });
     const code = env.AVA_MENU_SUBMIT_CODE;
-    const appId = env.AVA_GITHUB_APP_ID;
-    const installationId = env.AVA_GITHUB_INSTALLATION_ID;
-    const key = env.AVA_GITHUB_PRIVATE_KEY;
-    if (!code || code.length < 16 || !appId || !/^\d+$/.test(installationId) || !key) {
-      return json(503, { error: 'Trimiterea spre aprobare nu a fost configurată.' });
+    const siteOrigin = env.AVA_MENU_ORIGIN;
+    if (!code || code.length < 32 || !siteOrigin) {
+      return json(503, { error: 'Autentificarea editorului nu a fost configurată.' });
     }
-    if (!credentialsMatch(http.headers?.authorization, code)) {
-      return json(401, { error: 'Codul de trimitere este incorect.' });
+    if (method !== 'GET' && http.headers?.origin !== siteOrigin) {
+      return json(403, { error: 'Deschide editorul de pe site-ul AVA.' });
     }
+    if (method === 'DELETE') return json(200, { signedOut: true }, endSession());
+
+    const authenticated = validSession(http.headers?.cookie, code);
+    const snapshot = async (cookie) => {
+      try {
+        const contents = await readMenu(send);
+        return json(200, { items: JSON.parse(contents.toString()), menuVersion: hash(contents), categories }, cookie);
+      } catch {
+        return json(503, { error: 'Meniul nu poate fi încărcat momentan.' });
+      }
+    };
+    if (method === 'GET') {
+      return authenticated ? snapshot() : json(401, { error: 'Autentifică-te pentru a deschide editorul.' });
+    }
+
     const body = String(http.body ?? '');
     if (body.length > 1_300_000) return json(413, { error: 'Trimite mai puține fotografii într-o singură propunere.' });
 
@@ -143,6 +173,20 @@ function createHandler(send = fetch, env = process.env) {
       payload = JSON.parse(decoded.toString());
     } catch {
       return json(400, { error: 'Datele propunerii nu au un format valid.' });
+    }
+
+    if (payload?.action === 'login') {
+      if (!correctPassword(payload.password, code)) return json(401, { error: 'Parola este incorectă.' });
+      return snapshot(startSession(code));
+    }
+    if (!authenticated) return json(401, { error: 'Sesiunea a expirat.' });
+    if (payload?.action !== 'propose') return json(400, { error: 'Acțiunea nu este validă.' });
+
+    const appId = env.AVA_GITHUB_APP_ID;
+    const installationId = env.AVA_GITHUB_INSTALLATION_ID;
+    const key = env.AVA_GITHUB_PRIVATE_KEY;
+    if (!appId || !/^\d+$/.test(installationId) || !key) {
+      return json(503, { error: 'Trimiterea spre aprobare nu a fost configurată.' });
     }
 
     try {
