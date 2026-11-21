@@ -25,10 +25,12 @@ export function layoutFor(page) {
     const reserve = page === 'casa'
       ? button('Întreabă de o cameră', '#contact', 'outline', 'casa-header-arrow.svg')
       : button('Rezervă', '#contact', page === 'restaurant' ? 'green' : 'wine', 'home-reserve-arrow.svg');
-    return `<header class="page-header wrap ${page === 'casa' ? 'page-header--casa' : ''}">
-      <nav class="page-nav" aria-label="Navigare principală">${links}</nav>
-      <a class="page-brand" href="${base}" aria-label="AVA Brebu, acasă">${logo}</a>
-      <div class="page-reserve">${reserve}</div>
+    return `<header class="page-header${page === 'casa' ? ' page-header--casa' : ''}">
+      <div class="page-header-inner wrap">
+        <nav class="page-nav" aria-label="Navigare principală">${links}</nav>
+        <a class="page-brand" href="${base}" aria-label="AVA Brebu, acasă">${logo}</a>
+        <div class="page-reserve">${reserve}</div>
+      </div>
     </header>`;
   }
 
@@ -54,8 +56,9 @@ export function layoutFor(page) {
 
   function footer() {
     const casa = page === 'casa';
-    const prefix = page === 'pizzeria' ? 'pizza' : page;
-    return `<footer id="contact" class="site-footer${casa ? ' site-footer--casa' : ''}"${casa ? '' : ` style="--footer-pattern: url('${asset(`${prefix}-footer-pattern.svg`)}')"`}>
+    const reservationNote = '<p class="footer-note">Detaliile de rezervare vor fi publicate aici.</p>';
+    const arrow = '<span aria-hidden="true">↗</span>';
+    return `<footer id="contact" class="site-footer ${casa ? 'site-footer--casa' : 'site-footer--patterned'}">
       <div class="wrap">
         ${casa ? '<p class="kicker">Suntem aici. Cu drag.</p>' : ''}
         <div class="footer-head">
@@ -64,7 +67,7 @@ export function layoutFor(page) {
         </div>
         <div class="footer-columns">
           <a class="footer-brand" href="${base}" aria-label="AVA Brebu, acasă">
-            ${casa ? '<span class="nav-wordmark">ava</span><span class="kicker">Gust. Odihnă. Împreună.</span>' : photo(`${prefix}-footer-logo.svg`, '', 'footer-seal')}
+            ${casa ? '<span class="nav-wordmark">ava</span><span class="kicker">Gust. Odihnă. Împreună.</span>' : photo('home-footer-logo.svg', '', 'footer-seal')}
           </a>
           <nav class="footer-links" aria-label="Explorează">
             <p class="kicker">Explorează</p>
@@ -72,16 +75,27 @@ export function layoutFor(page) {
           </nav>
           <div class="footer-links">
             <p class="kicker">Planifică o vizită</p>
-            <a href="${directions}">Cum ajungi la noi ↗</a>
-            <a href="${base}restaurant/#meniul-zilei">Meniul zilei</a>
+            ${casa ? '' : `<details class="footer-contact">
+              <summary>Contact &amp; rezervări ${arrow}</summary>
+              <div class="footer-contact-copy"><p>Brebu, Caraș-Severin</p>${reservationNote}</div>
+            </details>`}
+            <a href="${directions}">Cum ajungi la noi ${arrow}</a>
+            <a href="${base}restaurant/#meniul-zilei">Meniul zilei${casa ? '' : ` ${arrow}`}</a>
           </div>
-          <div class="footer-links">
+          ${casa ? `<div class="footer-links">
             <p class="kicker">Contact &amp; rezervări</p>
             <p>Brebu, Caraș-Severin</p>
-            <p class="footer-note">Detaliile de rezervare vor fi publicate aici.</p>
-          </div>
+            ${reservationNote}
+          </div>` : `<div class="footer-links">
+            <p class="kicker">Ținem legătura</p>
+            <p>Instagram ${arrow}</p>
+            <p>Facebook ${arrow}</p>
+          </div>`}
         </div>
-        <div class="footer-bottom">© 2026 AVA</div>
+        <div class="footer-bottom">
+          <p>© 2026 AVA</p>
+          ${casa ? '' : '<p class="footer-legal">Confidențialitate Cookies ANPC</p>'}
+        </div>
       </div>
     </footer>`;
   }

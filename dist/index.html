@@ -81,7 +81,7 @@
         </div>
         <img class="home-stay-photo" src="./assets/site/home-room.webp" alt="Cameră cu pat dublu, mobilier din lemn și lumină naturală" loading="lazy" decoding="async">
       </section></main>
-  <footer id="contact" class="site-footer" style="--footer-pattern: url('./assets/site/home-footer-pattern.svg')">
+  <footer id="contact" class="site-footer site-footer--patterned">
       <div class="wrap">
 
         <div class="footer-head">
@@ -98,16 +98,23 @@
           </nav>
           <div class="footer-links">
             <p class="kicker">Planifică o vizită</p>
-            <a href="https://www.google.com/maps/search/?api=1&amp;query=Brebu%2C+Cara%C8%99-Severin%2C+Rom%C3%A2nia">Cum ajungi la noi ↗</a>
-            <a href="./restaurant/#meniul-zilei">Meniul zilei</a>
+            <details class="footer-contact">
+              <summary>Contact &amp; rezervări <span aria-hidden="true">↗</span></summary>
+              <div class="footer-contact-copy"><p>Brebu, Caraș-Severin</p><p class="footer-note">Detaliile de rezervare vor fi publicate aici.</p></div>
+            </details>
+            <a href="https://www.google.com/maps/search/?api=1&amp;query=Brebu%2C+Cara%C8%99-Severin%2C+Rom%C3%A2nia">Cum ajungi la noi <span aria-hidden="true">↗</span></a>
+            <a href="./restaurant/#meniul-zilei">Meniul zilei <span aria-hidden="true">↗</span></a>
           </div>
           <div class="footer-links">
-            <p class="kicker">Contact &amp; rezervări</p>
-            <p>Brebu, Caraș-Severin</p>
-            <p class="footer-note">Detaliile de rezervare vor fi publicate aici.</p>
+            <p class="kicker">Ținem legătura</p>
+            <p>Instagram <span aria-hidden="true">↗</span></p>
+            <p>Facebook <span aria-hidden="true">↗</span></p>
           </div>
         </div>
-        <div class="footer-bottom">© 2026 AVA</div>
+        <div class="footer-bottom">
+          <p>© 2026 AVA</p>
+          <p class="footer-legal">Confidențialitate Cookies ANPC</p>
+        </div>
       </div>
     </footer>
 </body>

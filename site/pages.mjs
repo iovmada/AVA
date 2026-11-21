@@ -80,7 +80,14 @@ export function pizzaPage() {
     description: 'Descoperă pizzeria AVA din Brebu și meniul de pizza coaptă pe vatră.',
     content: `
       <section class="pizza-hero wrap" aria-labelledby="pizzeria-title">
-        ${ui.photo('pizza-hero.webp', '', 'pizza-hero-photo', true)}
+        <picture>
+          <source media="(max-width: 730px)"
+            srcset="${ui.base}assets/pizza-portrait-640.webp 640w, ${ui.base}assets/pizza-portrait-1200.webp 1200w"
+            sizes="(max-width: 425px) 390px, 92vw">
+          <img class="pizza-hero-photo" src="${ui.base}assets/pizza-hero-1920.webp"
+            srcset="${ui.base}assets/pizza-hero-1280.webp 1280w, ${ui.base}assets/pizza-hero-1920.webp 1920w, ${ui.base}assets/pizza-hero-2560.webp 2560w"
+            sizes="(min-width: 1440px) 1312px, 92vw" alt="" fetchpriority="high" decoding="async">
+        </picture>
         <div class="pizza-hero-copy">
           <p class="kicker">Făină. Apă. Foc. Și un pic de suflet.</p>
           <h1 id="pizzeria-title">Din foc.<br><em>Cu drag.</em></h1>
@@ -110,20 +117,36 @@ export function pizzaPage() {
   });
 }
 
+const dailyCourseLabels = [
+  ['Felul întâi', 'course-soup.svg'],
+  ['Felul principal', 'course-main.svg'],
+  ['Alături', 'course-side.svg'],
+];
+
 function dailyPanel(ui) {
-  return `<section class="daily-panel wrap" id="meniul-zilei" aria-labelledby="daily-title" style="--menu-texture: url('${ui.asset('restaurant-menu-texture.webp')}')">
+  const weightLabel = (grams) => `<span class="daily-weight">${grams}&nbsp;g</span>`;
+  return `<section class="daily-panel wrap" id="meniul-zilei" aria-labelledby="daily-title" style="--menu-texture: url('${ui.asset('restaurant-daily-texture.webp')}')">
     <header class="panel-head">
       <p class="kicker">Meniul zilei / O pauză cum se cuvine</p>
       <h2 id="daily-title">Prânzul are gust la meniul zilei</h2>
       <p>Luni – Vineri / 12:00 – 16:00</p>
     </header>
     <div class="daily-grid">
-      ${dailyMenu.map(([price, soup, main, side], i) => `<article class="daily-card">
-        <div class="daily-card-head"><h3 class="kicker">Varianta 0${i + 1}</h3><p class="dish-price">${price} <small>lei</small></p></div>
-        <dl><dt>Felul întâi</dt><dd>${soup}</dd><dt>Felul principal</dt><dd>${main}</dd><dt>Alături</dt><dd>${side}</dd></dl>
-        <p>Pâine de casă inclusă</p>
-      </article>`).join('')}
+      ${dailyMenu.map(({ price, servings, courses, breadWeight }, i) => `<article class="daily-card">
+          <h3 class="sr-only">Varianta 0${i + 1}</h3>
+          <dl>
+            ${dailyCourseLabels.map(([label, icon], index) => {
+              const [dish, grams] = courses[index];
+              return `<div><dt class="sr-only">${label}</dt><dd>${ui.icon(icon)}<span>${dish}</span>${weightLabel(grams)}</dd></div>`;
+            }).join('')}
+          </dl>
+          <div class="daily-summary">
+            <p class="daily-bread">${ui.icon('course-bread.svg')}<span>Pâine de casă inclusă</span>${weightLabel(breadWeight)}</p>
+            <p class="daily-price">${price} lei <small class="daily-serving">/ ${servings} ${servings === 1 ? 'porție' : 'porții'}</small></p>
+          </div>
+        </article>`).join('')}
     </div>
+    <p class="daily-portion-note">Gramajele și porțiile sunt orientative.</p>
     <div class="daily-footer">
       <div><h3>Veniți mai mulți? Vă facem loc.</h3><p>Pentru grupuri și mese în familie, pregătim totul din timp.</p></div>
       ${ui.button('Contactează-ne', '#contact', 'cream', 'restaurant-daily-arrow.svg')}
@@ -146,7 +169,7 @@ export function restaurantPage() {
             <a class="text-link" href="#contact">Rezervă o masă ↗</a>
           </div>
         </div>
-        ${ui.photo('restaurant-hero.webp', 'Bucate gătite la AVA, servite la masă', 'restaurant-hero-photo', true)}
+        ${ui.photo('restaurant-hero-ciolan.webp', 'Ciolan de porc crocant cu cartofi rumeniți', 'restaurant-hero-photo', true)}
       </section>
       ${dailyPanel(ui)}
       ${menuPanel(ui, {
@@ -155,7 +178,7 @@ export function restaurantPage() {
         items: restaurantMenu, featured, texture: 'restaurant-menu-texture.webp', tone: 'green',
       })}
       <section class="restaurant-story wrap">
-        ${ui.photo('home-dining.webp', 'Sala restaurantului, cu lumină naturală și mese aranjate')}
+        ${ui.photo('restaurant-story-tochitura.webp', 'Tochitură cu mămăligă, pâine proaspătă și tacâmuri pe o masă de lemn')}
         <div><p class="kicker">Lasă graba la ușă.</p><h2>Mai mult decât<br>o masă bună.</h2>
         <p>Un prânz între prieteni sau o duminică în familie. La Ava, ne plac mesele care adună oamenii și poveștile care mai cer încă o cafea. Așază-te. Ești de-al casei.</p></div>
       </section>

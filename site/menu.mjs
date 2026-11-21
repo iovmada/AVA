@@ -36,7 +36,28 @@ export const featured = [
 ];
 
 export const dailyMenu = [
-  [35, 'Supă de pui cu tăiței de casă', 'Șnițel de pui', 'Piure de cartofi · Salată de varză'],
-  [38, 'Ciorbă țărănească de legume', 'Ceafă de porc la cuptor', 'Cartofi aurii · Murături de casă'],
-  [32, 'Supă cremă de legume', 'Tocăniță de ciuperci', 'Mămăligă · Salată de sezon'],
+  {
+    price: 35, servings: 1, breadWeight: 50,
+    courses: [
+      ['Supă de pui cu tăiței de casă', 300],
+      ['Șnițel de pui', 180],
+      ['Piure de cartofi · Salată de varză', 250],
+    ],
+  },
+  {
+    price: 38, servings: 1, breadWeight: 50,
+    courses: [
+      ['Ciorbă țărănească de legume', 300],
+      ['Ceafă de porc la cuptor', 200],
+      ['Cartofi aurii · Murături de casă', 220],
+    ],
+  },
+  {
+    price: 32, servings: 1, breadWeight: 50,
+    courses: [
+      ['Supă cremă de legume', 300],
+      ['Tocăniță de ciuperci', 220],
+      ['Mămăligă · Salată de sezon', 250],
+    ],
+  },
 ];

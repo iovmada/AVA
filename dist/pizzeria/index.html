@@ -16,14 +16,23 @@
 </head>
 <body class="page-pizzeria">
   <a class="skip-link" href="#continut">Mergi la conținut</a>
-  <header class="page-header wrap ">
-      <nav class="page-nav" aria-label="Navigare principală"><a href="../pizzeria/" aria-current="page">Pizzeria</a><a href="../restaurant/">Restaurant</a><a href="../casa/">Casa</a></nav>
-      <a class="page-brand" href="../" aria-label="AVA Brebu, acasă"><img src="../assets/site/pizza-header-logo.svg" width="127" height="127" alt=""></a>
-      <div class="page-reserve"><a class="pill pill--wine" href="#contact">Rezervă<img class="icon" src="../assets/site/home-reserve-arrow.svg" alt="" aria-hidden="true"></a></div>
+  <header class="page-header">
+      <div class="page-header-inner wrap">
+        <nav class="page-nav" aria-label="Navigare principală"><a href="../pizzeria/" aria-current="page">Pizzeria</a><a href="../restaurant/">Restaurant</a><a href="../casa/">Casa</a></nav>
+        <a class="page-brand" href="../" aria-label="AVA Brebu, acasă"><img src="../assets/site/pizza-header-logo.svg" width="127" height="127" alt=""></a>
+        <div class="page-reserve"><a class="pill pill--wine" href="#contact">Rezervă<img class="icon" src="../assets/site/home-reserve-arrow.svg" alt="" aria-hidden="true"></a></div>
+      </div>
     </header>
   <main id="continut">
       <section class="pizza-hero wrap" aria-labelledby="pizzeria-title">
-        <img class="pizza-hero-photo" src="../assets/site/pizza-hero.webp" alt="" fetchpriority="high" decoding="async">
+        <picture>
+          <source media="(max-width: 730px)"
+            srcset="../assets/pizza-portrait-640.webp 640w, ../assets/pizza-portrait-1200.webp 1200w"
+            sizes="(max-width: 425px) 390px, 92vw">
+          <img class="pizza-hero-photo" src="../assets/pizza-hero-1920.webp"
+            srcset="../assets/pizza-hero-1280.webp 1280w, ../assets/pizza-hero-1920.webp 1920w, ../assets/pizza-hero-2560.webp 2560w"
+            sizes="(min-width: 1440px) 1312px, 92vw" alt="" fetchpriority="high" decoding="async">
+        </picture>
         <div class="pizza-hero-copy">
           <p class="kicker">Făină. Apă. Foc. Și un pic de suflet.</p>
           <h1 id="pizzeria-title">Din foc.<br><em>Cu drag.</em></h1>
@@ -130,7 +139,7 @@
     </a>
       </div>
     </section></main>
-  <footer id="contact" class="site-footer" style="--footer-pattern: url('../assets/site/pizza-footer-pattern.svg')">
+  <footer id="contact" class="site-footer site-footer--patterned">
       <div class="wrap">
 
         <div class="footer-head">
@@ -139,7 +148,7 @@
         </div>
         <div class="footer-columns">
           <a class="footer-brand" href="../" aria-label="AVA Brebu, acasă">
-            <img class="footer-seal" src="../assets/site/pizza-footer-logo.svg" alt="" loading="lazy" decoding="async">
+            <img class="footer-seal" src="../assets/site/home-footer-logo.svg" alt="" loading="lazy" decoding="async">
           </a>
           <nav class="footer-links" aria-label="Explorează">
             <p class="kicker">Explorează</p>
@@ -147,16 +156,23 @@
           </nav>
           <div class="footer-links">
             <p class="kicker">Planifică o vizită</p>
-            <a href="https://www.google.com/maps/search/?api=1&amp;query=Brebu%2C+Cara%C8%99-Severin%2C+Rom%C3%A2nia">Cum ajungi la noi ↗</a>
-            <a href="../restaurant/#meniul-zilei">Meniul zilei</a>
+            <details class="footer-contact">
+              <summary>Contact &amp; rezervări <span aria-hidden="true">↗</span></summary>
+              <div class="footer-contact-copy"><p>Brebu, Caraș-Severin</p><p class="footer-note">Detaliile de rezervare vor fi publicate aici.</p></div>
+            </details>
+            <a href="https://www.google.com/maps/search/?api=1&amp;query=Brebu%2C+Cara%C8%99-Severin%2C+Rom%C3%A2nia">Cum ajungi la noi <span aria-hidden="true">↗</span></a>
+            <a href="../restaurant/#meniul-zilei">Meniul zilei <span aria-hidden="true">↗</span></a>
           </div>
           <div class="footer-links">
-            <p class="kicker">Contact &amp; rezervări</p>
-            <p>Brebu, Caraș-Severin</p>
-            <p class="footer-note">Detaliile de rezervare vor fi publicate aici.</p>
+            <p class="kicker">Ținem legătura</p>
+            <p>Instagram <span aria-hidden="true">↗</span></p>
+            <p>Facebook <span aria-hidden="true">↗</span></p>
           </div>
         </div>
-        <div class="footer-bottom">© 2026 AVA</div>
+        <div class="footer-bottom">
+          <p>© 2026 AVA</p>
+          <p class="footer-legal">Confidențialitate Cookies ANPC</p>
+        </div>
       </div>
     </footer>
 </body>
