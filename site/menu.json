@@ -3,11 +3,11 @@
     "id": "pizzeria-0",
     "section": "pizzeria",
     "name": "Margherita",
-    "price": 32,
+    "price": 3200,
     "description": "Sos de roșii, mozzarella fior di latte, busuioc proaspăt",
     "weight": 400,
     "category": "Pizza",
-    "active": false,
+    "active": true,
     "note": "Clasică, așa cum trebuie."
   },
   {
@@ -18,7 +18,7 @@
     "description": "Mozzarella, gorgonzola, parmezan, brânză maturată",
     "weight": 420,
     "category": "Pizza",
-    "active": false
+    "active": true
   },
   {
     "id": "pizzeria-2",
@@ -28,7 +28,7 @@
     "description": "Sos de roșii, mozzarella, prosciutto cotto, ciuperci",
     "weight": 450,
     "category": "Pizza",
-    "active": false
+    "active": true
   },
   {
     "id": "pizzeria-3",
@@ -38,7 +38,7 @@
     "description": "Sos de roșii, mozzarella, șuncă, ciuperci, măsline, anghinare",
     "weight": 480,
     "category": "Pizza",
-    "active": false
+    "active": true
   },
   {
     "id": "pizzeria-4",
