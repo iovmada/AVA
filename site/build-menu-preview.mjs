@@ -13,6 +13,7 @@ const files = [
   'assets/ava-logo.svg',
   'assets/site/home-footer-logo.svg',
   ...(review ? ['admin/access.js', 'assets/site/pizza-header-logo.svg'] : []),
+  ...(serverless ? ['site.js', 'assets/site/pizza-menu-texture.webp'] : []),
   ...(serverless ? [] : new Set(menu.filter(item => item.photo).map(item => `assets/site/${item.photo}`))),
 ];
 
@@ -23,6 +24,7 @@ await Promise.all([
   ...files.map(file => copyFile(new URL(file, source), new URL(file, output))),
   cp(new URL('assets/fonts/', source), new URL('assets/fonts/', output), { recursive: true }),
   writeFile(new URL('admin/index.html', output), adminPage({ preview: review ? 'review' : 'draft' })),
+  ...(serverless ? [copyFile(new URL('shared.mjs', import.meta.url), new URL('../shared.mjs', output))] : []),
   ...(serverless ? [] : [
     writeFile(new URL('robots.txt', output), 'User-agent: *\nDisallow: /\n'),
     writeFile(new URL('index.html', output), `<!doctype html>

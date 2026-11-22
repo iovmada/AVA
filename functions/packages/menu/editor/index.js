@@ -4,15 +4,18 @@ const { createHash } = require('node:crypto');
 
 const folder = path.join(__dirname, 'public');
 const editorUrl = '/api/menu/editor/admin/';
+const pizzeriaUrl = '/api/menu/editor/pizzeria/';
 const publicFiles = new Map([
   ['/admin/', 'admin/index.html'],
   ['/admin/access.js', 'admin/access.js'],
   ['/admin/editor.js', 'admin/editor.js'],
   ['/admin/editor.css', 'admin/editor.css'],
+  ['/site.js', 'site.js'],
   ['/styles.css', 'styles.css'],
   ['/assets/ava-logo.svg', 'assets/ava-logo.svg'],
   ['/assets/site/home-footer-logo.svg', 'assets/site/home-footer-logo.svg'],
   ['/assets/site/pizza-header-logo.svg', 'assets/site/pizza-header-logo.svg'],
+  ['/assets/site/pizza-menu-texture.webp', 'assets/site/pizza-menu-texture.webp'],
 ]);
 const samplePhotos = new Set(['restaurant-ciolan.webp', 'restaurant-tochitura.webp']);
 const fontTypes = { '.ttf': 'font/ttf', '.woff2': 'font/woff2' };
@@ -38,12 +41,16 @@ function response(statusCode, body, headers = {}) {
   };
 }
 
-async function readTestPhoto(file, hash) {
-  const photo = await fetch(`https://api.github.com/repos/iovmada/AVA/contents/dist/assets/site/${file}?ref=ava%2Fmenu-review-test`, {
+function readTestFile(file) {
+  return fetch(`https://api.github.com/repos/iovmada/AVA/contents/${file}?ref=ava%2Fmenu-review-test`, {
     headers: { Accept: 'application/vnd.github.raw+json', 'User-Agent': 'AVA-Menu-Editor' },
     signal: AbortSignal.timeout(5_000),
     redirect: 'error',
   });
+}
+
+async function readTestPhoto(file, hash) {
+  const photo = await readTestFile(`dist/assets/site/${file}`);
   if (!photo.ok) return;
   const bytes = Buffer.from(await photo.arrayBuffer());
   const limit = hash ? 155_000 : 400_000;
@@ -56,6 +63,18 @@ exports.main = async ({ http } = {}) => {
   if (http?.method !== 'GET' && http?.method !== 'HEAD') return response(405, '', { Allow: 'GET, HEAD' });
   const resource = (http.path || '/').replace(/^.*\/menu\/editor(?=\/|$)/, '') || '/';
   if (resource === '/' || resource === '/admin') return response(302, '', { Location: editorUrl });
+  if (resource === '/pizzeria') return response(302, '', { Location: pizzeriaUrl });
+  if (resource === '/pizzeria/') {
+    try {
+      const menu = await readTestFile('site/menu.json');
+      if (!menu.ok) throw new Error('Test menu unavailable');
+      const { pizzeriaPreview } = await import('./pizzeria.mjs');
+      const html = pizzeriaPreview(await menu.json());
+      return response(200, http.method === 'HEAD' ? '' : html, { 'Content-Type': types['.html'] });
+    } catch {
+      return response(503, 'Meniul de test nu poate fi încărcat momentan.', { 'Content-Type': 'text/plain; charset=utf-8' });
+    }
+  }
 
   await bundledAssets;
   const file = publicFiles.get(resource);
