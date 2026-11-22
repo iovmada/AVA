@@ -3,7 +3,7 @@ const { categories, hash, MenuError, validateProposal } = require('./menu-data.j
 const { correctPassword, startSession, endSession, validSession } = require('./admin-session.js');
 
 const repository = 'iovmada/AVA';
-const base = 'main';
+const testBase = 'ava/menu-review-test';
 const menuPath = 'site/menu.json';
 const assetPath = 'dist/assets/site/';
 const origin = 'https://api.github.com';
@@ -61,18 +61,18 @@ function githubClient(send, token, prefix = '') {
   };
 }
 
-async function propose(api, payload) {
+async function propose(api, payload, base) {
   if (!payload || typeof payload.version !== 'string' || !/^[a-f0-9]{64}$/.test(payload.version)) {
     throw new MenuError(400, 'Versiunea meniului nu este validă.');
   }
 
   const { object: { sha: parent } } = await api(`/git/ref/heads/${base}`);
-  const rules = await api(`/rules/branches/${base}`);
+  const rules = await api(`/rules/branches/${encodeURIComponent(base)}`);
   const requiredReview = rules.some(({ type, parameters }) => type === 'pull_request'
     && parameters.required_approving_review_count >= 1
     && parameters.require_code_owner_review
     && parameters.dismiss_stale_reviews_on_push);
-  if (!requiredReview) throw new MenuError(503, 'Ramura de producție trebuie să aibă aprobarea obligatorie activată.');
+  if (!requiredReview) throw new MenuError(503, 'Ramura meniului trebuie să aibă aprobarea obligatorie activată.');
   const ownersFile = await api(`/contents/.github/CODEOWNERS?ref=${parent}`);
   const owners = Buffer.from(ownersFile.content, 'base64').toString().split(/\r?\n/)
     .map((line) => line.trim()).filter((line) => line && !line.startsWith('#'));
@@ -91,9 +91,10 @@ async function propose(api, payload) {
   if (content === currentData.toString()) throw new MenuError(400, 'Nu există modificări de trimis.');
 
   // Identical retries reuse the same branch and pull request.
-  const branch = `ava/menu-${hash(parent + content).slice(0, 24)}`;
+  const test = base === testBase;
+  const branch = `ava/menu-${test ? 'test-' : ''}${hash(parent + content).slice(0, 24)}`;
   const findRequest = async () => {
-    const [prior] = await api(`/pulls?state=all&head=${encodeURIComponent('iovmada:' + branch)}&base=${base}`);
+    const [prior] = await api(`/pulls?state=all&head=${encodeURIComponent('iovmada:' + branch)}&base=${encodeURIComponent(base)}`);
     if (!prior) return null;
     if (prior.state === 'open') return prior.html_url;
     throw new MenuError(409, 'Această propunere a fost deja închisă. Verifică istoricul de pe GitHub.');
@@ -121,9 +122,11 @@ async function propose(api, payload) {
 
   try {
     const request = await api('/pulls', {
-      title: 'Propunere de actualizare a meniului AVA',
+      title: `${test ? '[TEST] ' : ''}Propunere de actualizare a meniului AVA`,
       head: branch, base,
-      body: '@iovmada, verifică prețurile, preparatele și fotografiile în **Files changed**. Meniul se publică după aprobare și îmbinare în ramura de producție.',
+      body: test
+        ? '@iovmada, verifică prețurile, preparatele și fotografiile în **Files changed**. Îmbinarea actualizează doar ramura de test.'
+        : '@iovmada, verifică prețurile, preparatele și fotografiile în **Files changed**. Meniul se publică după aprobare și îmbinare în ramura de producție.',
     });
     return request.html_url;
   } catch (error) {
@@ -134,8 +137,8 @@ async function propose(api, payload) {
   }
 }
 
-async function readPublishedMenu(send) {
-  const response = await send(`${origin}/repos/${repository}/contents/${menuPath}?ref=${base}`, {
+async function readPublishedMenu(send, base) {
+  const response = await send(`${origin}/repos/${repository}/contents/${menuPath}?ref=${encodeURIComponent(base)}`, {
     headers: { Accept: 'application/vnd.github+json', 'User-Agent': 'AVA-Menu-Editor', 'Cache-Control': 'no-cache' },
     redirect: 'error',
     signal: AbortSignal.timeout(8_000),
@@ -151,9 +154,11 @@ function createHandler(send = fetch, env = process.env, readMenu = readPublished
     if (!['GET', 'POST', 'DELETE'].includes(method)) return json(405, { error: 'Metodă indisponibilă.' });
     const code = env.AVA_MENU_SUBMIT_CODE;
     const siteOrigin = env.AVA_MENU_ORIGIN;
-    if (!code || code.length < 32 || !siteOrigin) {
+    const mode = env.AVA_MENU_REVIEW_MODE || 'production';
+    if (!code || code.length < 32 || !siteOrigin || !['production', 'test'].includes(mode)) {
       return json(503, { error: 'Autentificarea editorului nu a fost configurată.' });
     }
+    const base = mode === 'test' ? testBase : 'main';
     if (method !== 'GET' && http.headers?.origin !== siteOrigin) {
       return json(403, { error: 'Deschide editorul de pe site-ul AVA.' });
     }
@@ -162,7 +167,7 @@ function createHandler(send = fetch, env = process.env, readMenu = readPublished
     const authenticated = validSession(http.headers?.cookie, code);
     const snapshot = async (cookie) => {
       try {
-        const contents = await readMenu(send);
+        const contents = await readMenu(send, base);
         return json(200, { items: JSON.parse(contents.toString()), menuVersion: hash(contents), categories }, cookie);
       } catch {
         return json(503, { error: 'Meniul nu poate fi încărcat momentan.' });
@@ -204,7 +209,7 @@ function createHandler(send = fetch, env = process.env, readMenu = readPublished
         repositories: ['AVA'], permissions: { contents: 'write', pull_requests: 'write' },
       });
       const api = githubClient(send, token, `/repos/${repository}`);
-      const url = await propose(api, payload);
+      const url = await propose(api, payload, base);
       return json(200, { url });
     } catch (error) {
       if (error instanceof MenuError) return json(error.status, { error: error.message });

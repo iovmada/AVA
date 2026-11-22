@@ -4,12 +4,14 @@ import { menu } from './menu.mjs';
 
 const source = new URL('../dist/', import.meta.url);
 const output = new URL('../menu-preview/', import.meta.url);
+const review = process.argv.includes('--review');
 const files = [
   'styles.css',
   'admin/editor.css',
   'admin/editor.js',
   'assets/ava-logo.svg',
   'assets/site/home-footer-logo.svg',
+  ...(review ? ['admin/access.js', 'assets/site/pizza-header-logo.svg'] : []),
   ...new Set(menu.filter(item => item.photo).map(item => `assets/site/${item.photo}`)),
 ];
 
@@ -19,7 +21,7 @@ await Promise.all(['admin/', 'assets/site/'].map(directory =>
 await Promise.all([
   ...files.map(file => copyFile(new URL(file, source), new URL(file, output))),
   cp(new URL('assets/fonts/', source), new URL('assets/fonts/', output), { recursive: true }),
-  writeFile(new URL('admin/index.html', output), adminPage({ publicPreview: true })),
+  writeFile(new URL('admin/index.html', output), adminPage({ preview: review ? 'review' : 'draft' })),
   writeFile(new URL('robots.txt', output), 'User-agent: *\nDisallow: /\n'),
   writeFile(new URL('index.html', output), `<!doctype html>
 <html lang="ro">

@@ -7,6 +7,7 @@
   "scripts": {
     "build": "node site/build.mjs",
     "build:menu-preview": "node site/build-menu-preview.mjs",
+    "build:menu-review-preview": "node site/build-menu-preview.mjs --review",
     "dev": "node scripts/serve.mjs",
     "preview": "node scripts/serve.mjs"
   },

@@ -1,8 +1,12 @@
 import { categories, menu, menuVersion } from './menu.mjs';
 
-export function adminPage({ publicPreview = false } = {}) {
-  const demo = publicPreview || process.env.AVA_MENU_DEMO === '1';
-  const siteUrl = publicPreview ? 'https://www.ava-brebu.ro/' : '../';
+export function adminPage({ preview = '' } = {}) {
+  const demo = preview === 'draft' || (!preview && process.env.AVA_MENU_DEMO === '1');
+  const reviewTest = preview === 'review';
+  const siteUrl = preview ? 'https://www.ava-brebu.ro/' : '../';
+  const reviewNote = reviewTest
+    ? 'Propunerea merge pe ramura de test din GitHub. Aprobarea și îmbinarea actualizează doar meniul de test.'
+    : demo ? 'Modificările de test se salvează în acest browser.' : 'Meniul public se actualizează după aprobarea pe GitHub.';
   const proposalUrl = process.env.AVA_MENU_PROPOSAL_URL || '/api/menu/propose';
   if (!/^\/api\/[a-z0-9/-]+$/.test(proposalUrl)) {
     throw new Error('AVA_MENU_PROPOSAL_URL must be a same-origin /api/ path.');
@@ -24,14 +28,14 @@ export function adminPage({ publicPreview = false } = {}) {
 <body class="${demo ? 'menu-editor' : 'editor-access'}">
   ${demo ? '' : `<main class="editor-login">
     <img class="editor-login-logo" src="../assets/site/pizza-header-logo.svg" width="76" height="76" alt="AVA Brebu">
-    <h1>Administrare meniu</h1>
+    <h1>Administrare meniu</h1>${reviewTest ? '\n    <p>Previzualizare · Aprobare pe GitHub</p>' : ''}
     <form id="editor-login" method="post">
       <label for="editor-password">Parolă</label>
       <input id="editor-password" type="password" name="password" autocomplete="current-password" required>
       <p id="access-status" role="status"></p>
       <button class="editor-button editor-button--primary" type="submit">Intră în editor <span aria-hidden="true">→</span></button>
     </form>
-    <a href="../">Înapoi la site</a>
+    <a href="${siteUrl}">Înapoi la site</a>
   </main>
   <template id="editor-template">`}
   <aside class="editor-sidebar">
@@ -48,7 +52,7 @@ export function adminPage({ publicPreview = false } = {}) {
   </aside>
   <main class="editor-main">
     <div class="editor-topline">
-      <span class="editor-path">Administrare <span aria-hidden="true">/</span> <span id="editor-section">Pizzeria</span></span>
+      <span class="editor-path">${reviewTest ? 'Meniu de test' : 'Administrare'} <span aria-hidden="true">/</span> <span id="editor-section">Pizzeria</span></span>
       ${demo ? '<span class="draft-status">Previzualizare</span>' : '<button id="editor-logout" class="editor-button editor-button--outline" type="button">Deconectare</button>'}
     </div>
     <header class="editor-heading">
@@ -84,7 +88,7 @@ export function adminPage({ publicPreview = false } = {}) {
   </dialog>
   <dialog class="editor-dialog" id="review-dialog" aria-labelledby="review-title">
     <div class="dialog-heading"><h2 id="review-title">Verifică modificările</h2><button aria-label="Închide" type="button" class="dialog-close" data-close>×</button></div>
-    <p class="review-note">${publicPreview ? 'Modificările de test se salvează în acest browser.' : `Meniul public se actualizează după aprobarea pe GitHub.${demo ? ' Ciorna se salvează în acest browser.' : ''}`}</p>
+    <p class="review-note">${reviewNote}</p>
     <ul id="review-list" class="review-list"></ul>
     <div class="dialog-actions">
       <button class="editor-button editor-button--outline" type="button" data-close>Înapoi la editare</button>

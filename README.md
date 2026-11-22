@@ -38,3 +38,5 @@ Enable live submissions when the full site is ready for production.
 4. For the static site component, keep `main` as its source, enable automatic deploys, set the build command to `npm run build` and the output directory to `dist`. The editor calls `/api/menu/propose` by default.
 
 The restaurant owner signs in with the editor password. Sessions expire after eight hours. Change the password in DigitalOcean to revoke existing sessions. After the owner submits a proposal, review **Files changed**, then approve and merge on GitHub to deploy the new menu. Restaurant photos are resized in the browser and committed alongside the proposed menu.
+
+The separate approval preview builds with `npm run build:menu-review-preview` and publishes `menu-preview/`. Set `AVA_MENU_REVIEW_MODE=test` on its Functions component and set `AVA_MENU_ORIGIN` to the preview's HTTPS origin. That editor reads and opens pull requests against `ava/menu-review-test`, which needs the same required-review settings and code owners as production. For the production Functions component, set `AVA_MENU_REVIEW_MODE=production`.
