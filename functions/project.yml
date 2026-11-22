@@ -1,6 +1,11 @@
 packages:
   - name: menu
     functions:
+      - name: editor
+        runtime: nodejs:22
+        web: raw
+        environment:
+          AVA_MENU_REVIEW_MODE: "${AVA_MENU_REVIEW_MODE}"
       - name: propose
         runtime: nodejs:22
         web: raw

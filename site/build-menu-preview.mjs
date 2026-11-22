@@ -3,7 +3,8 @@ import { adminPage } from './admin.mjs';
 import { menu } from './menu.mjs';
 
 const source = new URL('../dist/', import.meta.url);
-const output = new URL('../menu-preview/', import.meta.url);
+const serverless = process.argv.includes('--function');
+const output = new URL(serverless ? '../functions/packages/menu/editor/public/' : '../menu-preview/', import.meta.url);
 const review = process.argv.includes('--review');
 const files = [
   'styles.css',
@@ -22,8 +23,9 @@ await Promise.all([
   ...files.map(file => copyFile(new URL(file, source), new URL(file, output))),
   cp(new URL('assets/fonts/', source), new URL('assets/fonts/', output), { recursive: true }),
   writeFile(new URL('admin/index.html', output), adminPage({ preview: review ? 'review' : 'draft' })),
-  writeFile(new URL('robots.txt', output), 'User-agent: *\nDisallow: /\n'),
-  writeFile(new URL('index.html', output), `<!doctype html>
+  ...(serverless ? [] : [
+    writeFile(new URL('robots.txt', output), 'User-agent: *\nDisallow: /\n'),
+    writeFile(new URL('index.html', output), `<!doctype html>
 <html lang="ro">
 <head>
   <meta charset="utf-8">
@@ -35,4 +37,5 @@ await Promise.all([
 <body><a href="./admin/">Deschide editorul de test</a></body>
 </html>
 `),
+  ]),
 ]);

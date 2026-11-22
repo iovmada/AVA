@@ -8,6 +8,7 @@
     "build": "node site/build.mjs",
     "build:menu-preview": "node site/build-menu-preview.mjs",
     "build:menu-review-preview": "node site/build-menu-preview.mjs --review",
+    "build:menu-editor-function": "node site/build-menu-preview.mjs --review --function",
     "dev": "node scripts/serve.mjs",
     "preview": "node scripts/serve.mjs"
   },
