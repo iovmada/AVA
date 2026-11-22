@@ -367,9 +367,9 @@ if (proposalUrl) {
         location.reload();
         return;
       }
-      const result = await response.json();
-      if (!response.ok) throw new Error(result.error || 'Propunerea nu a putut fi trimisă.');
-      if (!/^https:\/\/github\.com\/iovmada\/AVA\/pull\/\d+$/.test(result.url)) throw new Error('Linkul propunerii nu este valid.');
+      const result = await response.json().catch(() => null);
+      if (!response.ok) throw new Error(result?.error || 'Serviciul de aprobare nu a răspuns. Ciorna poate fi salvată și trimisă mai târziu.');
+      if (!/^https:\/\/github\.com\/iovmada\/AVA\/pull\/\d+$/.test(result?.url)) throw new Error('GitHub nu a confirmat primirea propunerii. Încearcă din nou.');
       link.href = result.url;
       link.hidden = false;
       feedback.textContent = 'Propunerea așteaptă aprobarea pe GitHub.';

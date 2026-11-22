@@ -62,10 +62,6 @@ function githubClient(send, token, prefix = '') {
 }
 
 async function propose(api, payload, base) {
-  if (!payload || typeof payload.version !== 'string' || !/^[a-f0-9]{64}$/.test(payload.version)) {
-    throw new MenuError(400, 'Versiunea meniului nu este validă.');
-  }
-
   const { object: { sha: parent } } = await api(`/git/ref/heads/${base}`);
   const rules = await api(`/rules/branches/${encodeURIComponent(base)}`);
   const requiredReview = rules.some(({ type, parameters }) => type === 'pull_request'
@@ -195,6 +191,9 @@ function createHandler(send = fetch, env = process.env, readMenu = readPublished
     }
     if (!authenticated) return json(401, { error: 'Sesiunea a expirat.' });
     if (payload?.action !== 'propose') return json(400, { error: 'Acțiunea nu este validă.' });
+    if (typeof payload.version !== 'string' || !/^[a-f0-9]{64}$/.test(payload.version)) {
+      return json(400, { error: 'Versiunea meniului nu este validă.' });
+    }
 
     const appId = env.AVA_GITHUB_APP_ID;
     const installationId = env.AVA_GITHUB_INSTALLATION_ID;
@@ -203,8 +202,13 @@ function createHandler(send = fetch, env = process.env, readMenu = readPublished
       return json(503, { error: 'Trimiterea spre aprobare nu a fost configurată.' });
     }
 
+    let app;
     try {
-      const app = githubClient(send, jwt(appId, signingKey(key)));
+      app = githubClient(send, jwt(appId, signingKey(key)));
+    } catch {
+      return json(424, { error: 'Cheia aplicației GitHub nu este validă. Administratorul trebuie să verifice configurația.' });
+    }
+    try {
       const { token } = await app(`/app/installations/${installationId}/access_tokens`, {
         repositories: ['AVA'], permissions: { contents: 'write', pull_requests: 'write' },
       });
@@ -213,7 +217,7 @@ function createHandler(send = fetch, env = process.env, readMenu = readPublished
       return json(200, { url });
     } catch (error) {
       if (error instanceof MenuError) return json(error.status, { error: error.message });
-      return json(502, { error: 'GitHub nu a putut primi propunerea. Încearcă din nou.' });
+      return json(424, { error: 'GitHub nu a putut primi propunerea. Încearcă din nou.' });
     }
   };
 }
