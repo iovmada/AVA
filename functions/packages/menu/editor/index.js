@@ -14,6 +14,7 @@ const publicFiles = new Map([
   ['/assets/site/home-footer-logo.svg', 'assets/site/home-footer-logo.svg'],
   ['/assets/site/pizza-header-logo.svg', 'assets/site/pizza-header-logo.svg'],
 ]);
+const samplePhotos = new Set(['restaurant-ciolan.webp', 'restaurant-tochitura.webp']);
 const fontTypes = { '.ttf': 'font/ttf', '.woff2': 'font/woff2' };
 const types = {
   ...fontTypes,
@@ -23,15 +24,9 @@ const types = {
   '.svg': 'image/svg+xml',
   '.webp': 'image/webp',
 };
-const bundledAssets = Promise.all([
-  readdir(path.join(folder, 'assets', 'fonts')),
-  readdir(path.join(folder, 'assets', 'site')),
-]).then(([fonts, images]) => {
+const bundledAssets = readdir(path.join(folder, 'assets', 'fonts')).then((fonts) => {
   for (const font of fonts) {
     if (Object.hasOwn(fontTypes, path.extname(font))) publicFiles.set(`/assets/fonts/${font}`, `assets/fonts/${font}`);
-  }
-  for (const image of images) {
-    if (image.endsWith('.webp')) publicFiles.set(`/assets/site/${image}`, `assets/site/${image}`);
   }
 });
 
@@ -51,7 +46,9 @@ async function readTestPhoto(file, hash) {
   });
   if (!photo.ok) return;
   const bytes = Buffer.from(await photo.arrayBuffer());
-  if (bytes.length <= 155_000 && createHash('sha256').update(bytes).digest('hex') === hash) return bytes;
+  const limit = hash ? 155_000 : 400_000;
+  if (bytes.length > limit || bytes.toString('ascii', 0, 4) !== 'RIFF' || bytes.toString('ascii', 8, 12) !== 'WEBP') return;
+  if (!hash || createHash('sha256').update(bytes).digest('hex') === hash) return bytes;
 }
 
 exports.main = async ({ http } = {}) => {
@@ -63,11 +60,15 @@ exports.main = async ({ http } = {}) => {
   await bundledAssets;
   const file = publicFiles.get(resource);
   const newPhoto = resource.match(/^\/assets\/site\/(menu-([a-f0-9]{64})\.webp)$/);
+  const samplePhoto = resource.startsWith('/assets/site/') && samplePhotos.has(path.basename(resource))
+    && resource === `/assets/site/${path.basename(resource)}`;
   try {
-    const bytes = file ? await readFile(path.join(folder, file)) : newPhoto && await readTestPhoto(newPhoto[1], newPhoto[2]);
+    const bytes = file ? await readFile(path.join(folder, file))
+      : (newPhoto || samplePhoto) && await readTestPhoto(path.basename(resource), newPhoto?.[2]);
     if (!bytes) return response(404, 'Not found.');
-    const type = types[path.extname(file || newPhoto[1])];
-    const cache = newPhoto ? 'public, max-age=31536000, immutable' : 'no-store';
+    const type = types[path.extname(file || resource)];
+    const cache = newPhoto ? 'public, max-age=31536000, immutable'
+      : samplePhoto ? 'public, max-age=300' : 'no-store';
     const body = http.method === 'HEAD' ? '' : bytes.toString(type.startsWith('text/') ? 'utf8' : 'base64');
     return response(200, body, { 'Content-Type': type, 'Cache-Control': cache });
   } catch {

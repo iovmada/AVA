@@ -13,7 +13,7 @@ const files = [
   'assets/ava-logo.svg',
   'assets/site/home-footer-logo.svg',
   ...(review ? ['admin/access.js', 'assets/site/pizza-header-logo.svg'] : []),
-  ...new Set(menu.filter(item => item.photo).map(item => `assets/site/${item.photo}`)),
+  ...(serverless ? [] : new Set(menu.filter(item => item.photo).map(item => `assets/site/${item.photo}`))),
 ];
 
 await Promise.all(['admin/', 'assets/site/'].map(directory =>
