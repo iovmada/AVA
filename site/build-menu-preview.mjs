@@ -24,7 +24,11 @@ await Promise.all([
   ...files.map(file => copyFile(new URL(file, source), new URL(file, output))),
   cp(new URL('assets/fonts/', source), new URL('assets/fonts/', output), { recursive: true }),
   writeFile(new URL('admin/index.html', output), adminPage({ preview: review ? 'review' : 'draft' })),
-  ...(serverless ? [copyFile(new URL('shared.mjs', import.meta.url), new URL('../shared.mjs', output))] : []),
+  ...(serverless ? [
+    copyFile(new URL('shared.mjs', import.meta.url), new URL('../shared.mjs', output)),
+    copyFile(new URL('pizzeria.mjs', import.meta.url), new URL('../pizzeria-page.mjs', output)),
+    copyFile(new URL('stories.mjs', import.meta.url), new URL('../stories.mjs', output)),
+  ] : []),
   ...(serverless ? [] : [
     writeFile(new URL('robots.txt', output), 'User-agent: *\nDisallow: /\n'),
     writeFile(new URL('index.html', output), `<!doctype html>

@@ -18,6 +18,15 @@ const publicFiles = new Map([
   ['/assets/site/pizza-menu-texture.webp', 'assets/site/pizza-menu-texture.webp'],
 ]);
 const samplePhotos = new Set(['restaurant-ciolan.webp', 'restaurant-tochitura.webp']);
+const previewAssets = new Set([
+  'assets/pizza-hero-1280.webp', 'assets/pizza-hero-1920.webp', 'assets/pizza-hero-2560.webp',
+  'assets/pizza-portrait-640.webp', 'assets/pizza-portrait-1200.webp',
+  'assets/site/home-dining.webp', 'assets/site/casa-header-arrow.svg',
+  'assets/site/home-footer-arrow.svg', 'assets/site/home-reserve-arrow.svg',
+  'assets/site/home-story-arrow.svg', 'assets/site/pizza-hero-arrow.svg',
+  'assets/site/pizza-seal.svg', 'assets/site/footer-pattern.svg',
+]);
+const cachedAssets = new Map();
 const fontTypes = { '.ttf': 'font/ttf', '.woff2': 'font/woff2' };
 const types = {
   ...fontTypes,
@@ -58,6 +67,19 @@ async function readTestPhoto(file, hash) {
   if (!hash || createHash('sha256').update(bytes).digest('hex') === hash) return bytes;
 }
 
+async function readPreviewAsset(file) {
+  const cached = cachedAssets.get(file);
+  if (cached && cached.expires > Date.now()) return cached.bytes;
+  const asset = await fetch(`https://raw.githubusercontent.com/iovmada/AVA/refs/heads/ava/menu-review-test/dist/${file}`, {
+    signal: AbortSignal.timeout(8_000), redirect: 'error',
+  });
+  if (!asset.ok) return;
+  const bytes = Buffer.from(await asset.arrayBuffer());
+  if (bytes.length > 400_000) return;
+  cachedAssets.set(file, { bytes, expires: Date.now() + 300_000 });
+  return bytes;
+}
+
 exports.main = async ({ http } = {}) => {
   if (process.env.AVA_MENU_REVIEW_MODE !== 'test') return response(404, 'Not found.');
   if (http?.method !== 'GET' && http?.method !== 'HEAD') return response(405, '', { Allow: 'GET, HEAD' });
@@ -81,13 +103,15 @@ exports.main = async ({ http } = {}) => {
   const newPhoto = resource.match(/^\/assets\/site\/(menu-([a-f0-9]{64})\.webp)$/);
   const samplePhoto = resource.startsWith('/assets/site/') && samplePhotos.has(path.basename(resource))
     && resource === `/assets/site/${path.basename(resource)}`;
+  const previewAsset = previewAssets.has(resource.slice(1));
   try {
     const bytes = file ? await readFile(path.join(folder, file))
+      : previewAsset ? await readPreviewAsset(resource.slice(1))
       : (newPhoto || samplePhoto) && await readTestPhoto(path.basename(resource), newPhoto?.[2]);
     if (!bytes) return response(404, 'Not found.');
     const type = types[path.extname(file || resource)];
     const cache = newPhoto ? 'public, max-age=31536000, immutable'
-      : samplePhoto ? 'public, max-age=300' : 'no-store';
+      : samplePhoto || previewAsset ? 'public, max-age=300' : 'no-store';
     const body = http.method === 'HEAD' ? '' : bytes.toString(type.startsWith('text/') ? 'utf8' : 'base64');
     return response(200, body, { 'Content-Type': type, 'Cache-Control': cache });
   } catch {
